@@ -37,7 +37,7 @@ export default function RootLayout({ children }) {
       <Head>
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased page-bg`}>
         {children}
 
         {/* Schema Markup for CompareMyParkings */}
