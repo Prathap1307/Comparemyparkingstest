@@ -1,0 +1,117 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String        @id @default(cuid())
+  email        String        @unique
+  name         String
+  passwordHash String?
+  roleId       String?
+  role         Role?         @relation(fields: [roleId], references: [id])
+  permissions  UserPermission[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+}
+
+model Role {
+  id           String            @id @default(cuid())
+  name         String            @unique
+  permissions  RolePermission[]
+  users        User[]
+}
+
+model Permission {
+  id   String @id @default(cuid())
+  key  String @unique
+  name String
+  roles RolePermission[]
+  users UserPermission[]
+}
+
+model RolePermission {
+  roleId       String
+  permissionId String
+  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+  @@id([roleId, permissionId])
+}
+
+model UserPermission {
+  userId       String
+  permissionId String
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+  @@id([userId, permissionId])
+}
+
+model Booking {
+  id             String    @id @default(cuid())
+  bookingRef     String    @unique
+  customerName   String
+  phone          String
+  email          String
+  vehicleReg     String
+  makeModel      String?
+  color          String?
+  mileageIn      Int?
+  mileageOut     Int?
+  parkingZone    String?
+  terminal       String
+  arrivalAt      DateTime
+  returnAt       DateTime
+  flightOutNumber String?
+  flightInNumber String?
+  serviceType    String
+  price          Float
+  paidAmount     Float
+  paymentStatus  String
+  sourceChannel  String
+  notes          String?
+  status         String
+  payments       Payment[]
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+}
+
+model Payment {
+  id        String   @id @default(cuid())
+  bookingId String
+  amount    Float
+  method    String?
+  status    String   @default("captured")
+  createdAt DateTime @default(now())
+  booking   Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+}
+
+model PricingRule {
+  id          String   @id @default(cuid())
+  name        String
+  terminal    String
+  startDate   DateTime
+  endDate     DateTime
+  dailyRate   Float
+  surcharge   Float   @default(0)
+  createdAt   DateTime @default(now())
+}
+
+model Capacity {
+  id          String   @id @default(cuid())
+  date        DateTime @unique
+  terminal    String
+  totalSpaces Int
+  occupied    Int?
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  action    String
+  userId    String?
+  meta      Json?
+  createdAt DateTime @default(now())
+}
